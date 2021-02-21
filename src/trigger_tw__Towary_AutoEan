@@ -1,0 +1,36 @@
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+CREATE TRIGGER [dbo].[tw__Towary_AutoEan] 
+   ON  [dbo].[tw__Towar] 
+   AFTER UPDATE, INSERT
+AS 
+BEGIN TRY
+	SET NOCOUNT ON;
+	IF (UPDATE(tw_CenaOtwarta) and (SELECT tw_CenaOtwarta FROM inserted)>0)
+	BEGIN
+	DECLARE @twId Int;
+	DECLARE @sEAN Varchar(20);
+	DECLARE @seria varchar(20);
+	DECLARE @iEAN int;
+	SET @seria='2000000'+'%';
+	SET @twId = (SELECT tw_Id FROM inserted);
+	SET @sEAN = (SELECT CAST(SUBSTRING(max(kody.iEAN),0,13) AS bigint)+1 FROM (SELECT tw_PodstKodKresk as iEAN FROM .[dbo].[tw__Towar] Where tw_PodstKodKresk LIKE @seria UNION SELECT kk_Kod as iEAN  from tw_KodKreskowy Where kk_Kod LIKE @seria) as kody)
+	SET @sEAN = CONCAT(@sEAN, dbo.fnCyfraKontrolnaEan(@sEAN));
+	IF @sEAN is null SET @sEAN='200000000001';
+	UPDATE tw__Towar SET tw_PodstKodKresk = @sEAN where tw_PodstKodKresk='' and tw_Id = @twId
+	INSERT INTO xtw_Ewid([twx_IdSource],[twx_Level],[twx_IdFrom],[twx_Entry],[twx_Rank]) values (@twId,0,null, @sEAN, 100)
+	END
+END TRY
+BEGIN CATCH
+END CATCH
+GO
+
+ALTER TABLE [dbo].[tw__Towar] ENABLE TRIGGER [It_tw_AutoEan]
+GO
+
+
