@@ -17,6 +17,12 @@ Rozwiązanie umożliwiające generowanie oraz zapis kodów EAN do produktów w I
 * Wybierz bazę danych z Twoim subiektem
 * Uruchom Query
 
+## Działanie rozwiązania
+
+Dodaj nowy towar testowy, w zakładce `Urządzenia` zaznacz `Otwarta cena w kasie fiskalnej`, zapisz nowo dodany towar.
+Po ponownym otworzeniu karty towaru, w zakładce `Urządzenia` znajdziesz kod EAN. Subiek GT daje możliwość wydrukowania kodu na etykietach cenowych (i nie tylko).
+Rozwiązanie doda również kod EAN do indeksu Subiekta, więc od razu po zapisaniu Towaru możesz wyszukać produkt w Subiekt Instynkt.
+
 ## Modyfikacje działania.
 1. Zmiana serii kodów kreskowych.
 
@@ -28,3 +34,4 @@ W triggerze zmień
 W trigerze (linia 14):
 
 `IF (UPDATE(tw_CenaOtwarta) and (SELECT tw_CenaOtwarta FROM inserted)>0)` zmień tw_CenaOtwarta na inne pole reprezentujące funkconalność, której nie używasz. Np. `[tw_WagaEtykiet]`, `[tw_SklepInternet]`, `[tw_SprzedazMobilna]`
+
